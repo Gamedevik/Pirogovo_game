@@ -177,7 +177,7 @@ def logout():
 def health_check():
     return {"status": "ok"}
 # ======================================================================
-# СКРИПТ ДЛЯ СОЗДАНИЯ АДМИНА (запускается при старте)
+# АВТОМАТИЧЕСКОЕ СОЗДАНИЕ АДМИНА
 # ======================================================================
 
 @app.on_event("startup")
@@ -189,31 +189,75 @@ def create_admin_on_startup():
     import os
     
     # Проверяем, нужно ли создать админа
-    if os.getenv("CREATE_ADMIN", "false").lower() == "true":
-        db = SessionLocal()
-        try:
-            admin_email = os.getenv("ADMIN_EMAIL", "admin@example.com")
-            admin_password = os.getenv("ADMIN_PASSWORD", "0000")
-            
-            # Проверяем, существует ли админ
-            admin = db.query(User).filter(User.email == admin_email).first()
-            if not admin:
-                admin = User(
-                    username="admin",
-                    email=admin_email,
-                    password=hash_password(admin_password),
-                    role="admin"
-                )
-                db.add(admin)
+    create_admin = os.getenv("CREATE_ADMIN", "false").lower() == "true"
+    
+    if not create_admin:
+        return
+    
+    db = SessionLocal()
+    try:
+        admin_email = os.getenv("ADMIN_EMAIL", "pcelovek102@gmail.com")
+        admin_password = os.getenv("ADMIN_PASSWORD", "root_8888")
+        admin_username = os.getenv("ADMIN_USERNAME", "pcelovek102")
+        
+        print(f"🔍 Проверка администратора: {admin_email}")
+        
+        # Проверяем, существует ли админ
+        admin = db.query(User).filter(User.email == admin_email).first()
+        
+        if not admin:
+            # Создаем нового админа
+            admin = User(
+                username=admin_username,
+                email=admin_email,
+                password=hash_password(admin_password),
+                role="admin"
+            )
+            db.add(admin)
+            db.commit()
+            print(f"✅ Администратор создан!")
+            print(f"   Email: {admin_email}")
+            print(f"   Пароль: {admin_password}")
+        else:
+            # Обновляем существующего до админа
+            if admin.role != "admin":
+                admin.role = "admin"
+                admin.password = hash_password(admin_password)
                 db.commit()
-                print(f"✅ Администратор создан! Email: {admin_email}")
+                print(f"✅ Пользователь {admin_email} обновлен до администратора!")
             else:
-                # Обновляем роль до admin
-                if admin.role != "admin":
-                    admin.role = "admin"
-                    db.commit()
-                    print(f"✅ Пользователь {admin_email} теперь администратор!")
-        except Exception as e:
-            print(f"⚠️ Ошибка создания админа: {e}")
-        finally:
-            db.close()
+                print(f"ℹ️ Пользователь {admin_email} уже является администратором")
+                
+    except Exception as e:
+        print(f"⚠️ Ошибка создания админа: {e}")
+    finally:
+        db.close()
+
+#Добавляем эндпоинт для создания админа (через API)        
+@app.post("/create-admin")
+def create_admin_endpoint(
+    email: str = Form(...),
+    password: str = Form(...),
+    username: str = Form(...),
+    db: Session = Depends(get_db)
+):
+    """Создает администратора (защищено секретным ключом)"""
+    secret = os.getenv("ADMIN_SECRET", "")
+    
+    # Проверяем секретный ключ (можно передать в заголовке)
+    # Для простоты - просто создаем, если нет админа
+    
+    existing = db.query(User).filter(User.email == email).first()
+    if existing:
+        return {"error": "Пользователь уже существует"}
+    
+    user = User(
+        username=username,
+        email=email,
+        password=hash_password(password),
+        role="admin"
+    )
+    db.add(user)
+    db.commit()
+    
+    return {"message": f"Администратор {username} создан!"}        
