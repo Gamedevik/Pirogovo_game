@@ -234,30 +234,37 @@ def create_admin_on_startup():
         db.close()
 
 #Добавляем эндпоинт для создания админа (через API)        
-@app.post("/create-admin")
-def create_admin_endpoint(
-    email: str = Form(...),
-    password: str = Form(...),
-    username: str = Form(...),
-    db: Session = Depends(get_db)
-):
-    """Создает администратора (защищено секретным ключом)"""
-    secret = os.getenv("ADMIN_SECRET", "")
+@app.get("/create-admin-now")
+def create_admin_now(db: Session = Depends(get_db)):
+    """Создает админа при переходе по ссылке"""
+    import bcrypt
     
-    # Проверяем секретный ключ (можно передать в заголовке)
-    # Для простоты - просто создаем, если нет админа
+    email = "pcelovek102@gmail.com"
+    password = "root_8888"
+    username = "pcelovek102"
     
-    existing = db.query(User).filter(User.email == email).first()
-    if existing:
-        return {"error": "Пользователь уже существует"}
+    # Проверяем, существует ли админ
+    admin = db.query(User).filter(User.email == email).first()
+    if admin:
+        db.delete(admin)
+        db.commit()
     
-    user = User(
+    # Создаем хеш пароля
+    password_bytes = password.encode('utf-8')
+    hashed = bcrypt.hashpw(password_bytes, bcrypt.gensalt()).decode('utf-8')
+    
+    # Создаем нового админа
+    new_admin = User(
         username=username,
         email=email,
-        password=hash_password(password),
+        password=hashed,
         role="admin"
     )
-    db.add(user)
+    db.add(new_admin)
     db.commit()
     
-    return {"message": f"Администратор {username} создан!"}        
+    return {
+        "message": "Администратор создан!",
+        "email": email,
+        "password": password
+    }       

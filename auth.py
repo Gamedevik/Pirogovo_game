@@ -3,7 +3,7 @@ import bcrypt
 from datetime import datetime, timedelta, timezone
 from jose import jwt, JWTError
 
-SECRET_KEY = os.getenv("SECRET_KEY", "dev-secret-key")
+SECRET_KEY = os.getenv("SECRET_KEY", "dev-secret-key-do-not-use-in-production")
 ALGORITHM = "HS256"
 TOKEN_EXPIRE_HOURS = int(os.getenv("TOKEN_EXPIRE_HOURS", 24))
 
@@ -21,9 +21,10 @@ def verify_password(plain: str, hashed: str) -> bool:
         plain_bytes = plain.encode('utf-8')
         if len(plain_bytes) > 72:
             plain_bytes = plain_bytes[:72]
-        return bcrypt.checkpw(plain_bytes, hashed.encode('utf-8'))
+        hashed_bytes = hashed.encode('utf-8')
+        return bcrypt.checkpw(plain_bytes, hashed_bytes)
     except Exception as e:
-        print(f"⚠️ Ошибка проверки: {e}")
+        print(f"⚠️ Ошибка проверки пароля: {e}")
         return False
 
 def create_token(data: dict) -> str:
