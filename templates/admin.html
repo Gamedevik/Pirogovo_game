@@ -1,0 +1,44 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <title>Админ-панель</title>
+    <style>
+        body { font-family: Arial, sans-serif; background: #1a1f16; color: #e0dcc8; padding: 40px; }
+        h1 { color: #c5a83d; }
+        table { border-collapse: collapse; width: 100%; max-width: 700px; margin-top: 20px; }
+        th, td { border: 1px solid #3a4030; padding: 8px 12px; text-align: left; }
+        th { background: #252b1f; color: #c5a83d; }
+        tr:nth-child(even) { background: #20261b; }
+        a { color: #c5a83d; }
+    </style>
+</head>
+<body>
+
+<h1>Админ-панель</h1>
+<p>Вы вошли как: {{ user.username }} ({{ user.role }})</p>
+
+<table>
+    <tr>
+        <th>ID</th>
+        <th>Имя</th>
+        <th>Email</th>
+        <th>Роль</th>
+        <th>Создан</th>
+    </tr>
+    {% for u in users %}
+    <tr>
+        <td>{{ u.id }}</td>
+        <td>{{ u.username }}</td>
+        <td>{{ u.email }}</td>
+        <td>{{ u.role }}</td>
+        <td>{{ u.created_at }}</td>
+    </tr>
+    {% endfor %}
+</table>
+
+<br>
+<a href="/profile">← Назад в профиль</a>
+
+</body>
+</html>

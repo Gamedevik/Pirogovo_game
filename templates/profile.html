@@ -1,0 +1,51 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <title>Профиль</title>
+    <style>
+        body { font-family: Arial, sans-serif; background: #1a1f16; color: #e0dcc8; padding: 40px; }
+        .card { background: #252b1f; border: 1px solid #3a4030; border-radius: 10px; padding: 25px; max-width: 420px; margin: 0 auto; }
+        h1 { color: #c5a83d; }
+        input { width: 100%; padding: 10px; margin-bottom: 10px; background: #1a1f16; border: 1px solid #3a4030; color: #e0dcc8; border-radius: 6px; }
+        button { padding: 10px 16px; background: #c5a83d; border: none; border-radius: 6px; cursor: pointer; font-weight: bold; }
+        a { color: #c5a83d; }
+        .msg { padding: 10px; border-radius: 6px; margin-bottom: 15px; }
+        .msg.ok { background: #2f5a2f; }
+        .msg.err { background: #5a2f2f; }
+        .admin-link { display: inline-block; margin-bottom: 15px; }
+    </style>
+</head>
+<body>
+<div class="card">
+
+    <h1>Профиль</h1>
+
+    {% if request.query_params.get('msg') == 'password_changed' %}
+        <div class="msg ok">Пароль успешно изменён.</div>
+    {% endif %}
+    {% if request.query_params.get('detail') %}
+        <div class="msg err">{{ request.query_params.get('detail') }}</div>
+    {% endif %}
+
+    <p><b>Имя:</b> {{ user.username }}</p>
+    <p><b>Email:</b> {{ user.email }}</p>
+    <p><b>Роль:</b> {{ user.role }}</p>
+
+    {% if user.role == "admin" %}
+        <p class="admin-link"><a href="/admin">Открыть админ-панель →</a></p>
+    {% endif %}
+
+    <h2>Сменить пароль</h2>
+    <form action="/change-password" method="post">
+        <input type="password" name="old_password" placeholder="Старый пароль" required>
+        <input type="password" name="new_password" placeholder="Новый пароль" required minlength="6">
+        <button type="submit">Сменить</button>
+    </form>
+
+    <br>
+    <a href="/logout">Выйти</a>
+
+</div>
+</body>
+</html>

@@ -1,0 +1,151 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Пирогово: Стратегия</title>
+    <style>
+        :root {
+            --bg-color: #1a1f16;
+            --card-bg: #252b1f;
+            --text-main: #e0dcc8;
+            --text-muted: #8a8672;
+            --accent: #c5a83d;
+            --error: #d44;
+            --success: #5a5;
+            --border: #3a4030;
+        }
+        * { box-sizing: border-box; margin: 0; padding: 0; font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; }
+        body {
+            background-color: var(--bg-color);
+            color: var(--text-main);
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            min-height: 100vh;
+            padding: 40px 20px;
+        }
+
+        .hero { text-align: center; margin-bottom: 40px; }
+        .hero h1 { font-size: 36px; color: var(--accent); margin-bottom: 10px; text-transform: uppercase; }
+        .hero p { color: var(--text-muted); max-width: 500px; margin: 0 auto; line-height: 1.5; }
+
+        .auth-container {
+            background-color: var(--card-bg);
+            border: 1px solid var(--border);
+            border-radius: 12px;
+            padding: 30px;
+            width: 100%;
+            max-width: 380px;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.5);
+        }
+        h2 { text-align: center; color: var(--accent); margin-bottom: 20px; font-size: 20px; }
+
+        .form-group { margin-bottom: 15px; }
+        label { display: block; margin-bottom: 5px; font-size: 14px; color: var(--text-muted); }
+        input {
+            width: 100%; padding: 12px; background-color: var(--bg-color);
+            border: 1px solid var(--border); border-radius: 6px;
+            color: var(--text-main); font-size: 16px; outline: none;
+        }
+        input:focus { border-color: var(--accent); }
+
+        .btn {
+            width: 100%; padding: 14px; background-color: var(--accent); color: var(--bg-color);
+            border: none; border-radius: 6px; font-size: 16px; font-weight: bold;
+            cursor: pointer; text-transform: uppercase; margin-top: 10px;
+        }
+        .btn:hover { background-color: #d4b84a; }
+
+        .links { text-align: center; margin-top: 20px; font-size: 14px; }
+        .links a { color: var(--accent); text-decoration: none; cursor: pointer; }
+        .links a:hover { text-decoration: underline; }
+
+        .screen { display: none; }
+        .screen.active { display: block; }
+
+        .server-msg {
+            background-color: var(--success); color: white; padding: 10px;
+            border-radius: 6px; margin-bottom: 15px; text-align: center; display: none;
+        }
+        .server-msg.error { background-color: var(--error); }
+    </style>
+</head>
+<body>
+
+    <div class="hero">
+        <h1>Хроники Пирогово</h1>
+        <p>Стратегический симулятор, где вместо стран — деревни, вместо танков — тракторы.</p>
+    </div>
+
+    <div class="auth-container">
+
+        <div id="server-message" class="server-msg"></div>
+
+        <div id="login-screen" class="screen active">
+            <h2>Вход в штаб</h2>
+            <form action="/login" method="POST">
+                <div class="form-group">
+                    <label>Почта</label>
+                    <input type="email" name="email" required>
+                </div>
+                <div class="form-group">
+                    <label>Пароль</label>
+                    <input type="password" name="password" required>
+                </div>
+                <button type="submit" class="btn">Мобилизация</button>
+            </form>
+            <div class="links">
+                Нет князя? <a onclick="toggleScreen('register-screen')">Зарегистрироваться</a>
+            </div>
+        </div>
+
+        <div id="register-screen" class="screen">
+            <h2>Создать князя</h2>
+            <form action="/register" method="POST">
+                <div class="form-group">
+                    <label>Имя князя (Логин)</label>
+                    <input type="text" name="username" required minlength="3" maxlength="32">
+                </div>
+                <div class="form-group">
+                    <label>Почта</label>
+                    <input type="email" name="email" required>
+                </div>
+                <div class="form-group">
+                    <label>Пароль</label>
+                    <input type="password" name="password" required minlength="6">
+                </div>
+                <button type="submit" class="btn">Мобилизация</button>
+            </form>
+            <div class="links">
+                Уже есть князь? <a onclick="toggleScreen('login-screen')">Войти</a>
+            </div>
+        </div>
+
+    </div>
+
+    <script>
+        function toggleScreen(screenId) {
+            document.querySelectorAll('.screen').forEach(s => s.classList.remove('active'));
+            document.getElementById(screenId).classList.add('active');
+            document.getElementById('server-message').style.display = 'none';
+        }
+
+        const urlParams = new URLSearchParams(window.location.search);
+        const msg = urlParams.get('msg');
+        const error = urlParams.get('detail');
+
+        const msgBox = document.getElementById('server-message');
+
+        if (msg === 'registered') {
+            msgBox.textContent = 'Деревня успешно основана! Теперь войдите.';
+            msgBox.style.display = 'block';
+            toggleScreen('login-screen');
+        } else if (error) {
+            msgBox.textContent = error;
+            msgBox.classList.add('error');
+            msgBox.style.display = 'block';
+        }
+    </script>
+</body>
+</html>
