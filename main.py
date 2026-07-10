@@ -172,3 +172,7 @@ def logout():
     response = RedirectResponse("/", status_code=303)
     response.delete_cookie("token")
     return response
+
+@app.get("/health")
+def health_check():
+    return {"status": "ok"}

@@ -1,25 +1,25 @@
 from sqlalchemy import create_engine
 from sqlalchemy.orm import sessionmaker, declarative_base
+import os
 
-# Единственное место, где определяется путь к базе данных.
-# Больше НИГДЕ (ни в main.py, ни в других файлах) не создаём свой engine/Base.
-DATABASE_URL = "sqlite:///./db.sqlite3"
+# Получаем DATABASE_URL из переменных окружения или используем SQLite для локальной разработки
+DATABASE_URL = os.getenv("DATABASE_URL", "sqlite:///./db.sqlite3")
+
+# Если это PostgreSQL, убираем check_same_thread (это только для SQLite)
+connect_args = {}
+if DATABASE_URL.startswith("sqlite"):
+    connect_args = {"check_same_thread": False}
 
 engine = create_engine(
     DATABASE_URL,
-    connect_args={"check_same_thread": False}  # нужно только для SQLite
+    connect_args=connect_args
 )
 
 SessionLocal = sessionmaker(autocommit=False, autoflush=False, bind=engine)
 
 Base = declarative_base()
 
-
 def get_db():
-    """
-    Dependency для FastAPI: открывает сессию БД на время запроса
-    и гарантированно закрывает её после.
-    """
     db = SessionLocal()
     try:
         yield db
