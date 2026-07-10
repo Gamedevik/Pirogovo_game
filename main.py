@@ -243,13 +243,14 @@ def create_admin_now(db: Session = Depends(get_db)):
     password = "root_8888"
     username = "pcelovek102"
     
-    # Проверяем, существует ли админ
+    # Удаляем старого админа
     admin = db.query(User).filter(User.email == email).first()
     if admin:
         db.delete(admin)
         db.commit()
+        print("🗑️ Старый админ удален")
     
-    # Создаем хеш пароля
+    # Создаем хеш пароля напрямую через bcrypt
     password_bytes = password.encode('utf-8')
     hashed = bcrypt.hashpw(password_bytes, bcrypt.gensalt()).decode('utf-8')
     
@@ -266,5 +267,6 @@ def create_admin_now(db: Session = Depends(get_db)):
     return {
         "message": "Администратор создан!",
         "email": email,
-        "password": password
-    }       
+        "password": password,
+        "hash": hashed[:20] + "..."
+    }
