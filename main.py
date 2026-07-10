@@ -176,3 +176,44 @@ def logout():
 @app.get("/health")
 def health_check():
     return {"status": "ok"}
+# ======================================================================
+# СКРИПТ ДЛЯ СОЗДАНИЯ АДМИНА (запускается при старте)
+# ======================================================================
+
+@app.on_event("startup")
+def create_admin_on_startup():
+    """Автоматически создает админа при первом запуске"""
+    from database import SessionLocal
+    from models import User
+    from auth import hash_password
+    import os
+    
+    # Проверяем, нужно ли создать админа
+    if os.getenv("CREATE_ADMIN", "false").lower() == "true":
+        db = SessionLocal()
+        try:
+            admin_email = os.getenv("ADMIN_EMAIL", "admin@example.com")
+            admin_password = os.getenv("ADMIN_PASSWORD", "0000")
+            
+            # Проверяем, существует ли админ
+            admin = db.query(User).filter(User.email == admin_email).first()
+            if not admin:
+                admin = User(
+                    username="admin",
+                    email=admin_email,
+                    password=hash_password(admin_password),
+                    role="admin"
+                )
+                db.add(admin)
+                db.commit()
+                print(f"✅ Администратор создан! Email: {admin_email}")
+            else:
+                # Обновляем роль до admin
+                if admin.role != "admin":
+                    admin.role = "admin"
+                    db.commit()
+                    print(f"✅ Пользователь {admin_email} теперь администратор!")
+        except Exception as e:
+            print(f"⚠️ Ошибка создания админа: {e}")
+        finally:
+            db.close()
