@@ -30,29 +30,37 @@ templates = Jinja2Templates(directory="templates")
 # ЗАПУСК TELEGRAM БОТА
 # ======================================================================
 
-def run_telegram_bot():
+def start_bot():
     """Запускает Telegram бота в отдельном процессе"""
     try:
-        subprocess.Popen(
+        # Проверяем токен
+        if not os.getenv("BOT_TOKEN"):
+            print("⚠️ BOT_TOKEN не задан")
+            return
+        
+        # Проверяем, не запущен ли уже бот
+        result = subprocess.run(['ps', 'aux'], capture_output=True, text=True)
+        if 'telegram_bot.py' in result.stdout:
+            print("🤖 Бот уже запущен")
+            return
+        
+        # Запускаем бота
+        process = subprocess.Popen(
             [sys.executable, "telegram_bot.py"],
             stdout=subprocess.PIPE,
-            stderr=subprocess.PIPE
+            stderr=subprocess.PIPE,
+            text=True
         )
-        print("🤖 Telegram бот запущен")
+        print(f"🤖 Бот запущен (PID: {process.pid})")
+        
     except Exception as e:
         print(f"⚠️ Ошибка запуска бота: {e}")
 
 @app.on_event("startup")
 def startup_event():
     """Действия при запуске"""
-    # Создаем админа
     create_admin_on_startup()
-    
-    # Запускаем бота
-    if os.getenv("BOT_TOKEN"):
-        run_telegram_bot()
-    else:
-        print("⚠️ BOT_TOKEN не задан")
+    start_bot()
 
 
 # ======================================================================
