@@ -3,67 +3,37 @@ import logging
 from telegram import Update, InlineKeyboardButton, InlineKeyboardMarkup, WebAppInfo
 from telegram.ext import Application, CommandHandler, ContextTypes
 
-# Настройка логирования
-logging.basicConfig(
-    format='%(asctime)s - %(name)s - %(levelname)s - %(message)s',
-    level=logging.INFO
-)
+logging.basicConfig(level=logging.INFO)
+logger = logging.getLogger(__name__)
 
-# Токен бота из переменных окружения
 BOT_TOKEN = os.getenv("BOT_TOKEN")
-APP_URL = os.getenv("APP_URL", "https://ваш-сайт.up.railway.app")
+APP_URL = os.getenv("APP_URL", "https://pirogovogame-production.up.railway.app")
 
 async def start(update: Update, context: ContextTypes.DEFAULT_TYPE):
-    """Приветственное сообщение с кнопкой открытия игры"""
     keyboard = [[
         InlineKeyboardButton(
             "🎮 Открыть игру",
             web_app=WebAppInfo(url=f"{APP_URL}/game")
         )
     ]]
-    reply_markup = InlineKeyboardMarkup(keyboard)
-    
     await update.message.reply_text(
         "🏰 **Хроники Пирогово**\n\n"
-        "Стратегический симулятор, где вместо стран — деревни, "
-        "вместо танков — тракторы.\n\n"
-        "Нажми кнопку, чтобы начать игру!",
-        reply_markup=reply_markup,
-        parse_mode='Markdown'
-    )
-
-async def help_command(update: Update, context: ContextTypes.DEFAULT_TYPE):
-    """Команда /help"""
-    await update.message.reply_text(
-        "📖 **Как играть:**\n\n"
-        "1. Нажми кнопку 'Открыть игру'\n"
-        "2. Зарегистрируйся или войди\n"
-        "3. Управляй своей деревней\n"
-        "4. Строй здания и развивай экономику\n"
-        "5. Завоевывай соседние деревни!\n\n"
-        "Удачи, князь! 👑",
+        "Добро пожаловать!\n"
+        "Нажми кнопку, чтобы начать.",
+        reply_markup=InlineKeyboardMarkup(keyboard),
         parse_mode='Markdown'
     )
 
 def main():
-    """Запуск бота"""
     if not BOT_TOKEN:
-        print("⚠️ BOT_TOKEN не установлен в переменных окружения!")
+        logger.error("❌ BOT_TOKEN не установлен")
         return
     
-    print(f"🤖 Запуск бота...")
-    print(f"🔗 Ссылка на игру: {APP_URL}")
-    
-    # Создаем приложение
-    application = Application.builder().token(BOT_TOKEN).build()
-    
-    # Добавляем обработчики команд
-    application.add_handler(CommandHandler("start", start))
-    application.add_handler(CommandHandler("help", help_command))
-    
-    # Запускаем бота
-    print("✅ Бот запущен и готов к работе!")
-    application.run_polling()
+    logger.info("🤖 Запуск бота...")
+    app = Application.builder().token(BOT_TOKEN).build()
+    app.add_handler(CommandHandler("start", start))
+    logger.info("✅ Бот готов!")
+    app.run_polling(allowed_updates=Update.ALL_TYPES)
 
 if __name__ == "__main__":
     main()
