@@ -6,136 +6,824 @@
     <title>Хроники Пирогово</title>
     <script src="https://telegram.org/js/telegram-web-app.js"></script>
     <style>
-        * { margin: 0; padding: 0; box-sizing: border-box; }
+        /* ========== HOI4 СТИЛЬ ========== */
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        
+        :root {
+            --bg-dark: #1a1a1a;
+            --bg-panel: #252525;
+            --bg-card: #2d2d2d;
+            --border-military: #4a3a2a;
+            --gold: #c5a83d;
+            --gold-light: #e8d060;
+            --text-light: #d4c8a0;
+            --text-muted: #8a8672;
+            --text-dark: #1a1a1a;
+            --shadow: rgba(0,0,0,0.7);
+        }
+        
         body {
-            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
-            background: #1a1f16;
-            color: #e0dcc8;
+            font-family: 'Segoe UI', 'Arial', sans-serif;
+            background: var(--bg-dark);
+            color: var(--text-light);
             min-height: 100vh;
-            display: flex;
-            justify-content: center;
-            align-items: center;
-            padding: 20px;
+            overflow: hidden;
+            height: 100vh;
         }
-        .card {
-            background: #252b1f;
-            border-radius: 20px;
-            padding: 30px;
-            max-width: 360px;
-            width: 100%;
-            border: 1px solid #3a4030;
-            text-align: center;
-        }
-        .avatar {
-            width: 100px;
-            height: 100px;
-            border-radius: 50%;
-            background: #c5a83d;
-            margin: 0 auto 20px;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            font-size: 40px;
-        }
-        h1 { color: #c5a83d; font-size: 24px; margin-bottom: 5px; }
-        .role {
-            display: inline-block;
-            background: #3a4030;
-            padding: 4px 16px;
-            border-radius: 20px;
-            font-size: 12px;
-            color: #8a8672;
-            margin-bottom: 20px;
-        }
-        .info {
-            text-align: left;
-            background: #1a1f16;
-            border-radius: 12px;
-            padding: 16px;
-            margin: 10px 0;
-        }
-        .info-item {
+        
+        /* ===== ВЕРХНЯЯ ПАНЕЛЬ (как в HOI4) ===== */
+        .top-bar {
+            background: linear-gradient(180deg, #2a2a2a, #1a1a1a);
+            border-bottom: 2px solid var(--border-military);
+            padding: 6px 16px;
             display: flex;
             justify-content: space-between;
-            padding: 8px 0;
-            border-bottom: 1px solid #252b1f;
+            align-items: center;
+            height: 44px;
+            flex-shrink: 0;
+            position: relative;
+            z-index: 10;
         }
-        .info-item:last-child { border-bottom: none; }
-        .label { color: #8a8672; font-size: 14px; }
-        .value { color: #e0dcc8; font-size: 14px; font-weight: 500; }
-        .btn {
-            display: block;
-            background: #c5a83d;
-            color: #1a1f16;
-            border: none;
-            padding: 12px;
-            border-radius: 12px;
-            font-weight: bold;
+        
+        .top-bar .title {
             font-size: 16px;
-            cursor: pointer;
-            width: 100%;
-            margin-top: 16px;
-            text-decoration: none;
-            text-align: center;
+            font-weight: bold;
+            color: var(--gold);
+            letter-spacing: 3px;
+            text-transform: uppercase;
+            text-shadow: 0 0 20px rgba(197, 168, 61, 0.2);
         }
-        .btn-secondary {
-            background: #3a4030;
-            color: #e0dcc8;
+        
+        .top-bar .date {
+            font-size: 11px;
+            color: var(--text-muted);
+            letter-spacing: 1px;
         }
-        .btn:active { transform: scale(0.97); }
-        .tg-user { 
-            background: #2a3a2a; 
-            padding: 8px 16px; 
-            border-radius: 20px;
+        
+        .top-bar .user-info {
             font-size: 12px;
-            color: #8a8672;
-            margin-bottom: 16px;
-            display: inline-block;
+            color: var(--text-muted);
+            display: flex;
+            align-items: center;
+            gap: 12px;
+        }
+        
+        .top-bar .user-info .role {
+            background: var(--border-military);
+            padding: 2px 10px;
+            border-radius: 10px;
+            font-size: 10px;
+            color: var(--gold);
+        }
+        
+        /* ===== ОСНОВНАЯ ОБЛАСТЬ ===== */
+        .main-area {
+            display: flex;
+            height: calc(100vh - 44px);
+            gap: 0;
+        }
+        
+        /* ===== ЛЕВАЯ ПАНЕЛЬ (ресурсы + меню) ===== */
+        .left-panel {
+            width: 180px;
+            min-width: 180px;
+            background: linear-gradient(180deg, #1e1e1e, #161616);
+            border-right: 2px solid var(--border-military);
+            padding: 10px 8px;
+            display: flex;
+            flex-direction: column;
+            gap: 6px;
+            overflow-y: auto;
+            flex-shrink: 0;
+        }
+        
+        .left-panel::-webkit-scrollbar {
+            width: 3px;
+        }
+        .left-panel::-webkit-scrollbar-track {
+            background: var(--bg-dark);
+        }
+        .left-panel::-webkit-scrollbar-thumb {
+            background: var(--border-military);
+        }
+        
+        .resource-group {
+            background: var(--bg-card);
+            border: 1px solid #3a3a2a;
+            border-radius: 4px;
+            padding: 8px 10px;
+        }
+        
+        .resource-group .label {
+            font-size: 9px;
+            text-transform: uppercase;
+            color: var(--text-muted);
+            letter-spacing: 1px;
+            margin-bottom: 4px;
+        }
+        
+        .resource-item {
+            display: flex;
+            justify-content: space-between;
+            font-size: 13px;
+            padding: 2px 0;
+            border-bottom: 1px solid #2a2a2a;
+        }
+        
+        .resource-item:last-child {
+            border-bottom: none;
+        }
+        
+        .resource-item .icon {
+            margin-right: 6px;
+        }
+        
+        .resource-item .value {
+            color: var(--gold);
+            font-weight: bold;
+        }
+        
+        /* ===== КНОПКИ МЕНЮ (как в HOI4) ===== */
+        .menu-btn {
+            background: var(--bg-card);
+            border: 1px solid #3a3a2a;
+            border-radius: 4px;
+            color: var(--text-light);
+            padding: 6px 10px;
+            font-size: 11px;
+            text-align: left;
+            cursor: pointer;
+            transition: all 0.2s;
+            font-family: inherit;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+        
+        .menu-btn:hover {
+            background: #3a3a2a;
+            border-color: var(--gold);
+        }
+        
+        .menu-btn.active {
+            background: #3a3a2a;
+            border-color: var(--gold);
+            color: var(--gold);
+        }
+        
+        .menu-btn .badge {
+            margin-left: auto;
+            background: var(--border-military);
+            padding: 0 6px;
+            border-radius: 8px;
+            font-size: 9px;
+        }
+        
+        /* ===== КАРТА ===== */
+        .map-container {
+            flex: 1;
+            background: #1a2a1a;
+            position: relative;
+            overflow: hidden;
+        }
+        
+        #map {
+            width: 100%;
+            height: 100%;
+            display: block;
+            cursor: grab;
+        }
+        
+        #map:active {
+            cursor: grabbing;
+        }
+        
+        /* ===== ПРАВАЯ ПАНЕЛЬ (информация) ===== */
+        .right-panel {
+            width: 220px;
+            min-width: 220px;
+            background: linear-gradient(180deg, #1e1e1e, #161616);
+            border-left: 2px solid var(--border-military);
+            padding: 10px;
+            display: flex;
+            flex-direction: column;
+            gap: 8px;
+            overflow-y: auto;
+            flex-shrink: 0;
+        }
+        
+        .right-panel::-webkit-scrollbar {
+            width: 3px;
+        }
+        .right-panel::-webkit-scrollbar-track {
+            background: var(--bg-dark);
+        }
+        .right-panel::-webkit-scrollbar-thumb {
+            background: var(--border-military);
+        }
+        
+        .info-card {
+            background: var(--bg-card);
+            border: 1px solid #3a3a2a;
+            border-radius: 4px;
+            padding: 10px;
+        }
+        
+        .info-card .title {
+            font-size: 11px;
+            text-transform: uppercase;
+            color: var(--gold);
+            letter-spacing: 1px;
+            margin-bottom: 6px;
+            border-bottom: 1px solid #3a3a2a;
+            padding-bottom: 4px;
+        }
+        
+        .info-card .row {
+            display: flex;
+            justify-content: space-between;
+            font-size: 12px;
+            padding: 3px 0;
+            color: var(--text-muted);
+        }
+        
+        .info-card .row .val {
+            color: var(--text-light);
+        }
+        
+        /* ===== АДАПТИВ ===== */
+        @media (max-width: 900px) {
+            .left-panel {
+                width: 140px;
+                min-width: 140px;
+            }
+            .right-panel {
+                width: 160px;
+                min-width: 160px;
+            }
+            .top-bar .title {
+                font-size: 12px;
+            }
+        }
+        
+        @media (max-width: 640px) {
+            .left-panel {
+                width: 100px;
+                min-width: 100px;
+                padding: 6px;
+            }
+            .right-panel {
+                display: none;
+            }
+            .resource-item {
+                font-size: 10px;
+            }
+            .menu-btn {
+                font-size: 9px;
+                padding: 4px 6px;
+            }
+            .top-bar .date {
+                display: none;
+            }
+        }
+        
+        /* ===== ВСПЛЫВАЮЩАЯ ПОДСКАЗКА ===== */
+        .tooltip {
+            position: absolute;
+            background: rgba(20, 20, 20, 0.95);
+            border: 1px solid var(--gold);
+            border-radius: 4px;
+            padding: 8px 12px;
+            font-size: 12px;
+            color: var(--text-light);
+            pointer-events: none;
+            display: none;
+            z-index: 100;
+            max-width: 200px;
+        }
+        
+        .tooltip .name {
+            color: var(--gold);
+            font-weight: bold;
+        }
+        
+        /* ===== ЛЕГЕНДА ===== */
+        .legend {
+            margin-top: auto;
+            background: var(--bg-card);
+            border: 1px solid #3a3a2a;
+            border-radius: 4px;
+            padding: 6px 8px;
+        }
+        
+        .legend-item {
+            display: flex;
+            align-items: center;
+            gap: 6px;
+            font-size: 10px;
+            color: var(--text-muted);
+            padding: 2px 0;
+        }
+        
+        .legend-item .color-box {
+            width: 12px;
+            height: 12px;
+            border-radius: 2px;
+            border: 1px solid #3a3a2a;
+            flex-shrink: 0;
         }
     </style>
 </head>
 <body>
-<div class="card">
-    <div class="avatar">👤</div>
-    
-    <div id="telegram-user" class="tg-user">🔹 Telegram</div>
-    
-    <h1 id="username">{{ user.username }}</h1>
-    <div class="role" id="role">{{ user.role }}</div>
-    
-    <div class="info">
-        <div class="info-item">
-            <span class="label">📧 Email</span>
-            <span class="value" id="email">{{ user.email }}</span>
-        </div>
-        <div class="info-item">
-            <span class="label">🆔 ID</span>
-            <span class="value" id="user-id">{{ user.id }}</span>
-        </div>
-        <div class="info-item">
-            <span class="label">📅 Дата регистрации</span>
-            <span class="value" id="created">{{ user.created_at.strftime('%d.%m.%Y') if user.created_at else '—' }}</span>
-        </div>
+
+<!-- ===== ВЕРХНЯЯ ПАНЕЛЬ ===== -->
+<div class="top-bar">
+    <div class="title">🏰 Хроники Пирогово</div>
+    <div class="date" id="gameDate">1936 · Война близко</div>
+    <div class="user-info">
+        <span id="usernameDisplay">{{ user.username }}</span>
+        <span class="role" id="roleDisplay">{{ user.role }}</span>
     </div>
-    
-    <a href="/profile" class="btn">👤 Профиль</a>
-    {% if user.role == 'admin' %}
-        <a href="/admin" class="btn btn-secondary" style="margin-top:10px;">⚙️ Админ-панель</a>
-    {% endif %}
-    <a href="/logout" class="btn btn-secondary" style="margin-top:10px;">🚪 Выйти</a>
 </div>
 
+<!-- ===== ОСНОВНАЯ ОБЛАСТЬ ===== -->
+<div class="main-area">
+
+    <!-- ===== ЛЕВАЯ ПАНЕЛЬ ===== -->
+    <div class="left-panel">
+        <!-- Ресурсы -->
+        <div class="resource-group">
+            <div class="label">📦 Ресурсы</div>
+            <div class="resource-item"><span class="icon">🌲</span> Древесина <span class="value" id="wood">100</span></div>
+            <div class="resource-item"><span class="icon">🌾</span> Продовольствие <span class="value" id="food">100</span></div>
+            <div class="resource-item"><span class="icon">💰</span> Золото <span class="value" id="gold">50</span></div>
+            <div class="resource-item"><span class="icon">🪨</span> Камень <span class="value" id="stone">30</span></div>
+        </div>
+
+        <!-- Меню -->
+        <button class="menu-btn active" data-tab="map">🗺️ Карта</button>
+        <button class="menu-btn" data-tab="buildings">🏗️ Здания</button>
+        <button class="menu-btn" data-tab="army">⚔️ Армия</button>
+        <button class="menu-btn" data-tab="diplomacy">🤝 Дипломатия</button>
+        <button class="menu-btn" data-tab="research">🔬 Исследования</button>
+        <button class="menu-btn" data-tab="factions">🏴 Фракции</button>
+
+        <!-- Легенда -->
+        <div class="legend" id="legend">
+            <div class="legend-item"><span class="color-box" style="background:#4345ed;"></span> Сенат</div>
+            <div class="legend-item"><span class="color-box" style="background:#c97b17;"></span> Пираты</div>
+            <div class="legend-item"><span class="color-box" style="background:#ff1eb5;"></span> Гвардия</div>
+            <div class="legend-item"><span class="color-box" style="background:#595959;"></span> Разбойники</div>
+            <div class="legend-item"><span class="color-box" style="background:#79470e;"></span> ГЭС</div>
+        </div>
+    </div>
+
+    <!-- ===== КАРТА ===== -->
+    <div class="map-container">
+        <canvas id="map"></canvas>
+        <div class="tooltip" id="tooltip">
+            <div class="name" id="tooltipName">Название</div>
+            <div id="tooltipDesc">Описание</div>
+        </div>
+    </div>
+
+    <!-- ===== ПРАВАЯ ПАНЕЛЬ ===== -->
+    <div class="right-panel">
+        <div class="info-card">
+            <div class="title">📍 Выбранный регион</div>
+            <div class="row"><span>Название</span><span class="val" id="selectedName">—</span></div>
+            <div class="row"><span>Владелец</span><span class="val" id="selectedOwner">—</span></div>
+            <div class="row"><span>Население</span><span class="val" id="selectedPop">—</span></div>
+            <div class="row"><span>Ресурсы</span><span class="val" id="selectedResources">—</span></div>
+        </div>
+
+        <div class="info-card">
+            <div class="title">⚔️ Действия</div>
+            <button class="menu-btn" style="width:100%;">🏗️ Построить</button>
+            <button class="menu-btn" style="width:100%;">⚔️ Атаковать</button>
+            <button class="menu-btn" style="width:100%;">🤝 Торговать</button>
+        </div>
+
+        <div class="info-card" style="margin-top:auto;">
+            <div class="title">📊 Сводка</div>
+            <div class="row"><span>Деревень</span><span class="val" id="totalVillages">1</span></div>
+            <div class="row"><span>Зданий</span><span class="val" id="totalBuildings">3</span></div>
+            <div class="row"><span>Население</span><span class="val" id="totalPop">10</span></div>
+        </div>
+    </div>
+</div>
+
+<!-- ===== SCRIPT ===== -->
 <script>
-    const tg = window.Telegram.WebApp;
-    tg.ready();
-    tg.expand();
-    
-    // Показываем данные пользователя из Telegram
-    const user = tg.initDataUnsafe?.user;
-    if (user) {
-        document.getElementById('telegram-user').textContent = `✅ Telegram: @${user.username || user.first_name}`;
-        document.getElementById('username').textContent = user.first_name || user.username || 'Гость';
+    // ===== Telegram WebApp =====
+    const tg = window.Telegram?.WebApp;
+    if (tg) {
+        tg.ready();
+        tg.expand();
+        const user = tg.initDataUnsafe?.user;
+        if (user) {
+            document.getElementById('usernameDisplay').textContent = user.first_name || user.username || 'Гость';
+        }
     }
+
+    // ===== ДАННЫЕ ФРАКЦИЙ =====
+    const factions = {
+        'Территории подконтрольные сенату': { color: '#4345ed', short: 'Сенат' },
+        'Моряки пирогово(Пираты сыпычевского пруда)': { color: '#c97b17', short: 'Пираты' },
+        'Гвардия Князя': { color: '#ff1eb5', short: 'Гвардия' },
+        'Территоря разбойников': { color: '#595959', short: 'Разбойники' },
+        'Рабочие Пироговской ГЭС': { color: '#79470e', short: 'ГЭС' },
+        'Вольные железнодорожники(Анархисты)': { color: '#0e3d79', short: 'Анархисты' },
+        'Территория, подчиняющиеся Асгарычу Шигапову': { color: '#1ed2ff', short: 'Шигапов' },
+        'Территория преступных синдикатов': { color: '#03ad1b', short: 'Синдикаты' },
+        'Территория негров(Эту землю им лично дал князь)': { color: '#4345ed', short: 'Негры' },
+        'Военный округ, созданный для борьбы с разбойниками': { color: '#03ad1b', short: 'Воен.округ' },
+        'Правительство мотоциклистов': { color: '#4345ed', short: 'Мото' },
+        'Независимые ВВС Пирогово': { color: '#1ed2ff', short: 'ВВС' },
+        'Территория Рабочих и крестьян Пирогово': { color: '#595959', short: 'Раб.крест.' },
+        'Территоря баронов': { color: '#00a197', short: 'Бароны' },
+        'Империя пятерочки': { color: '#4345ed', short: '5-ка' },
+        'Территория Новых свободных студентов сам гупса': { color: '#79470e', short: 'Студенты' },
+        'Союз Шундов и Татарбазара': { color: '#03ad1b', short: 'Шунды' }
+    };
+
+    // ===== ДАННЫЕ С КАРТОЙ =====
+    const mapData = {
+        territories: [
+            // Территории из KML (координаты примерно)
+            {
+                id: 1,
+                name: 'Пирогово',
+                faction: 'Территории подконтрольные сенату',
+                points: [
+                    {lat: 56.7822, lon: 53.1613},
+                    {lat: 56.7823, lon: 53.1581},
+                    {lat: 56.7829, lon: 53.1571},
+                    {lat: 56.7844, lon: 53.1501}
+                ],
+                population: 1200,
+                resources: '🌲🌾💰'
+            },
+            {
+                id: 2,
+                name: 'Сыпычевский пруд',
+                faction: 'Моряки пирогово(Пираты сыпычевского пруда)',
+                points: [
+                    {lat: 56.7732, lon: 53.1379},
+                    {lat: 56.7713, lon: 53.1367},
+                    {lat: 56.7693, lon: 53.1356},
+                    {lat: 56.7679, lon: 53.1349}
+                ],
+                population: 300,
+                resources: '🐟💰'
+            },
+            {
+                id: 3,
+                name: 'Гвардейская крепость',
+                faction: 'Гвардия Князя',
+                points: [
+                    {lat: 56.7723, lon: 53.1540},
+                    {lat: 56.7683, lon: 53.1356},
+                    {lat: 56.7707, lon: 53.1365},
+                    {lat: 56.7737, lon: 53.1392}
+                ],
+                population: 500,
+                resources: '⚔️💰'
+            },
+            {
+                id: 4,
+                name: 'Разбойничий стан',
+                faction: 'Территоря разбойников',
+                points: [
+                    {lat: 56.7798, lon: 53.1528},
+                    {lat: 56.7805, lon: 53.1503},
+                    {lat: 56.7812, lon: 53.1495},
+                    {lat: 56.7823, lon: 53.1467}
+                ],
+                population: 200,
+                resources: '🗡️'
+            },
+            {
+                id: 5,
+                name: 'Пироговская ГЭС',
+                faction: 'Рабочие Пироговской ГЭС',
+                points: [
+                    {lat: 56.7797, lon: 53.1645},
+                    {lat: 56.7785, lon: 53.1642},
+                    {lat: 56.7785, lon: 53.1591},
+                    {lat: 56.7798, lon: 53.1529}
+                ],
+                population: 800,
+                resources: '⚡💰'
+            },
+            {
+                id: 6,
+                name: 'Территория Асгарыча Шигапова',
+                faction: 'Территория, подчиняющиеся Асгарычу Шигапову',
+                points: [
+                    {lat: 56.7849, lon: 53.1817},
+                    {lat: 56.7848, lon: 53.1787},
+                    {lat: 56.7847, lon: 53.1746},
+                    {lat: 56.7867, lon: 53.1747}
+                ],
+                population: 600,
+                resources: '🏭💰'
+            },
+            {
+                id: 7,
+                name: 'Территория негров',
+                faction: 'Территория негров(Эту землю им лично дал князь)',
+                points: [
+                    {lat: 56.7758, lon: 53.1260},
+                    {lat: 56.7796, lon: 53.1286},
+                    {lat: 56.7770, lon: 53.1413},
+                    {lat: 56.7731, lon: 53.1386}
+                ],
+                population: 150,
+                resources: '🌾'
+            },
+            {
+                id: 8,
+                name: 'Военный округ',
+                faction: 'Военный округ, созданный для борьбы с разбойниками',
+                points: [
+                    {lat: 56.7813, lon: 53.1366},
+                    {lat: 56.7823, lon: 53.1369},
+                    {lat: 56.7837, lon: 53.1400},
+                    {lat: 56.7820, lon: 53.1467}
+                ],
+                population: 400,
+                resources: '⚔️🏗️'
+            },
+            {
+                id: 9,
+                name: 'Империя Пятерочки',
+                faction: 'Империя пятерочки',
+                points: [
+                    {lat: 56.7748, lon: 53.1631},
+                    {lat: 56.7753, lon: 53.1635},
+                    {lat: 56.7763, lon: 53.1637},
+                    {lat: 56.7759, lon: 53.1612}
+                ],
+                population: 1000,
+                resources: '🛒💰'
+            },
+            {
+                id: 10,
+                name: 'Республика студентов',
+                faction: 'Территория Новых свободных студентов сам гупса',
+                points: [
+                    {lat: 56.7967, lon: 53.1542},
+                    {lat: 56.7951, lon: 53.1761},
+                    {lat: 56.7891, lon: 53.1744},
+                    {lat: 56.7895, lon: 53.1689}
+                ],
+                population: 350,
+                resources: '📚☕'
+            },
+            {
+                id: 11,
+                name: 'Союз Шундов и Татарбазара',
+                faction: 'Союз Шундов и Татарбазара',
+                points: [
+                    {lat: 56.8047, lon: 53.1409},
+                    {lat: 56.8049, lon: 53.1437},
+                    {lat: 56.8033, lon: 53.1473},
+                    {lat: 56.8021, lon: 53.1498}
+                ],
+                population: 700,
+                resources: '🐴🌾'
+            }
+        ]
+    };
+
+    // ===== КОНСТАНТЫ КАРТЫ =====
+    const BOUNDS = {
+        minLat: 56.765,
+        maxLat: 56.81,
+        minLon: 53.12,
+        maxLon: 53.185
+    };
+
+    // ===== РЕНДЕР КАРТЫ =====
+    const canvas = document.getElementById('map');
+    const ctx = canvas.getContext('2d');
+    const tooltip = document.getElementById('tooltip');
+    const tooltipName = document.getElementById('tooltipName');
+    const tooltipDesc = document.getElementById('tooltipDesc');
+
+    let scale = 1;
+    let offsetX = 0;
+    let offsetY = 0;
+    let isDragging = false;
+    let dragStartX, dragStartY;
+
+    function resizeCanvas() {
+        const container = canvas.parentElement;
+        canvas.width = container.clientWidth;
+        canvas.height = container.clientHeight;
+        drawMap();
+    }
+
+    function latLonToPixel(lat, lon) {
+        const x = (lon - BOUNDS.minLon) / (BOUNDS.maxLon - BOUNDS.minLon) * canvas.width;
+        const y = (BOUNDS.maxLat - lat) / (BOUNDS.maxLat - BOUNDS.minLat) * canvas.height;
+        return { x: x * scale + offsetX, y: y * scale + offsetY };
+    }
+
+    function drawMap() {
+        ctx.clearRect(0, 0, canvas.width, canvas.height);
+        
+        // Фон карты
+        const gradient = ctx.createRadialGradient(
+            canvas.width/2, canvas.height/2, 0,
+            canvas.width/2, canvas.height/2, canvas.width/2
+        );
+        gradient.addColorStop(0, '#2a3a2a');
+        gradient.addColorStop(1, '#1a2a1a');
+        ctx.fillStyle = gradient;
+        ctx.fillRect(0, 0, canvas.width, canvas.height);
+
+        // Сетка
+        ctx.strokeStyle = 'rgba(255,255,255,0.03)';
+        ctx.lineWidth = 1;
+        for (let i = 0; i < canvas.width; i += 60) {
+            ctx.beginPath();
+            ctx.moveTo(i, 0);
+            ctx.lineTo(i, canvas.height);
+            ctx.stroke();
+        }
+        for (let i = 0; i < canvas.height; i += 60) {
+            ctx.beginPath();
+            ctx.moveTo(0, i);
+            ctx.lineTo(canvas.width, i);
+            ctx.stroke();
+        }
+
+        // Рисуем территории
+        mapData.territories.forEach((territory, index) => {
+            const factionInfo = factions[territory.faction] || { color: '#666666', short: 'Неизвестно' };
+            const color = factionInfo.color;
+            
+            // Преобразуем точки
+            const points = territory.points.map(p => latLonToPixel(p.lat, p.lon));
+            
+            if (points.length < 3) return;
+
+            // Заливка
+            ctx.beginPath();
+            ctx.moveTo(points[0].x, points[0].y);
+            for (let i = 1; i < points.length; i++) {
+                ctx.lineTo(points[i].x, points[i].y);
+            }
+            ctx.closePath();
+            
+            ctx.fillStyle = color + '55';
+            ctx.fill();
+            ctx.strokeStyle = color;
+            ctx.lineWidth = 2;
+            ctx.stroke();
+
+            // Название в центре
+            const centerX = points.reduce((s, p) => s + p.x, 0) / points.length;
+            const centerY = points.reduce((s, p) => s + p.y, 0) / points.length;
+            
+            ctx.fillStyle = '#fff';
+            ctx.font = `${10 * scale}px Arial`;
+            ctx.textAlign = 'center';
+            ctx.textBaseline = 'middle';
+            
+            // Тень для читаемости
+            ctx.shadowColor = 'rgba(0,0,0,0.8)';
+            ctx.shadowBlur = 4;
+            ctx.fillText(factionInfo.short || territory.name, centerX, centerY - 6 * scale);
+            ctx.shadowBlur = 0;
+            
+            // Название территории (мелко)
+            ctx.fillStyle = 'rgba(255,255,255,0.5)';
+            ctx.font = `${8 * scale}px Arial`;
+            ctx.fillText(territory.name, centerX, centerY + 10 * scale);
+        });
+
+        // Рисуем метку "Пирогово"
+        const center = latLonToPixel(56.779955, 53.15681);
+        ctx.shadowColor = 'rgba(0,0,0,0.8)';
+        ctx.shadowBlur = 8;
+        ctx.beginPath();
+        ctx.arc(center.x, center.y, 8 * scale, 0, 2 * Math.PI);
+        ctx.fillStyle = '#c5a83d';
+        ctx.fill();
+        ctx.shadowBlur = 0;
+        
+        ctx.fillStyle = '#fff';
+        ctx.font = `bold ${12 * scale}px Arial`;
+        ctx.textAlign = 'center';
+        ctx.textBaseline = 'bottom';
+        ctx.fillText('📍 Пирогово', center.x, center.y - 12 * scale);
+    }
+
+    // ===== ЗУМ И ПАН =====
+    canvas.addEventListener('wheel', (e) => {
+        e.preventDefault();
+        const delta = e.deltaY > 0 ? 0.9 : 1.1;
+        scale = Math.min(Math.max(scale * delta, 0.5), 3);
+        drawMap();
+    });
+
+    canvas.addEventListener('mousedown', (e) => {
+        isDragging = true;
+        dragStartX = e.clientX - offsetX;
+        dragStartY = e.clientY - offsetY;
+        canvas.style.cursor = 'grabbing';
+    });
+
+    window.addEventListener('mousemove', (e) => {
+        if (isDragging) {
+            offsetX = e.clientX - dragStartX;
+            offsetY = e.clientY - dragStartY;
+            drawMap();
+        }
+    });
+
+    window.addEventListener('mouseup', () => {
+        isDragging = false;
+        canvas.style.cursor = 'grab';
+    });
+
+    // ===== КЛИК ПО КАРТЕ =====
+    canvas.addEventListener('click', (e) => {
+        const rect = canvas.getBoundingClientRect();
+        const x = e.clientX - rect.left;
+        const y = e.clientY - rect.top;
+        
+        // Преобразуем в координаты карты
+        const mapX = (x - offsetX) / scale;
+        const mapY = (y - offsetY) / scale;
+        
+        // Ищем территорию
+        let found = null;
+        for (const territory of mapData.territories) {
+            const points = territory.points.map(p => {
+                const px = (p.lon - BOUNDS.minLon) / (BOUNDS.maxLon - BOUNDS.minLon) * canvas.width * scale + offsetX;
+                const py = (BOUNDS.maxLat - p.lat) / (BOUNDS.maxLat - BOUNDS.minLat) * canvas.height * scale + offsetY;
+                return { x: px, y: py };
+            });
+            
+            // Простая проверка (для демо)
+            const centerX = points.reduce((s, p) => s + p.x, 0) / points.length;
+            const centerY = points.reduce((s, p) => s + p.y, 0) / points.length;
+            const dist = Math.sqrt((x - centerX) ** 2 + (y - centerY) ** 2);
+            if (dist < 50 * scale) {
+                found = territory;
+                break;
+            }
+        }
+        
+        if (found) {
+            const factionInfo = factions[found.faction] || { color: '#666', short: 'Неизвестно' };
+            document.getElementById('selectedName').textContent = found.name;
+            document.getElementById('selectedOwner').textContent = factionInfo.short;
+            document.getElementById('selectedPop').textContent = found.population || '—';
+            document.getElementById('selectedResources').textContent = found.resources || '—';
+            
+            // Показываем тултип
+            tooltipName.textContent = found.name;
+            tooltipDesc.textContent = `Владелец: ${factionInfo.short} | Население: ${found.population || '?'}`;
+            tooltip.style.display = 'block';
+            tooltip.style.left = (e.clientX + 10) + 'px';
+            tooltip.style.top = (e.clientY - 10) + 'px';
+            setTimeout(() => tooltip.style.display = 'none', 3000);
+        }
+    });
+
+    // ===== МЕНЮ =====
+    document.querySelectorAll('.menu-btn').forEach(btn => {
+        btn.addEventListener('click', function() {
+            document.querySelectorAll('.menu-btn').forEach(b => b.classList.remove('active'));
+            this.classList.add('active');
+        });
+    });
+
+    // ===== ИНИЦИАЛИЗАЦИЯ =====
+    window.addEventListener('resize', resizeCanvas);
+    resizeCanvas();
+
+    // Обновление времени
+    function updateDate() {
+        const now = new Date();
+        const seasons = ['Весна', 'Лето', 'Осень', 'Зима'];
+        const season = seasons[Math.floor((now.getMonth() % 12) / 3)];
+        document.getElementById('gameDate').textContent = 
+            `${now.getFullYear()} · ${season} · День ${now.getDate()}`;
+    }
+    updateDate();
+    setInterval(updateDate, 60000);
+
+    console.log('🗺️ Хроники Пирогово загружены!');
 </script>
 </body>
 </html>

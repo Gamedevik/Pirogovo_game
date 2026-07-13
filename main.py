@@ -255,3 +255,21 @@ if __name__ == "__main__":
     import uvicorn
     port = int(os.getenv("PORT", 8080))
     uvicorn.run(app, host="0.0.0.0", port=port)
+
+
+@app.get("/api/map-data")
+def get_map_data():
+    """Возвращает данные карты из KML"""
+    from kml_parser import parse_kml
+    
+    territories = parse_kml('data/Карта развалившегося пирогово_01-07-2025_18-11-29.kml')
+    
+    return {
+        "territories": territories,
+        "bounds": {
+            "min_lat": 53.12,
+            "max_lat": 53.18,
+            "min_lon": 56.76,
+            "max_lon": 56.81
+        }
+    }
