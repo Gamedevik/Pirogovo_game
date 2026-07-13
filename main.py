@@ -33,18 +33,11 @@ templates = Jinja2Templates(directory="templates")
 def start_bot():
     """Запускает Telegram бота в отдельном процессе"""
     try:
-        # Проверяем токен
         if not os.getenv("BOT_TOKEN"):
             print("⚠️ BOT_TOKEN не задан")
             return
         
-        # Проверяем, не запущен ли уже бот
-        result = subprocess.run(['ps', 'aux'], capture_output=True, text=True)
-        if 'telegram_bot.py' in result.stdout:
-            print("🤖 Бот уже запущен")
-            return
-        
-        # Запускаем бота
+        # Просто запускаем бота без проверки через ps
         process = subprocess.Popen(
             [sys.executable, "telegram_bot.py"],
             stdout=subprocess.PIPE,
@@ -273,3 +266,18 @@ def get_map_data():
             "max_lon": 56.81
         }
     }
+@app.get("/game")
+def game_page(request: Request, user: User = Depends(get_optional_user)):
+    if not user:
+        return RedirectResponse("/", status_code=303)
+    return templates.TemplateResponse(request, "game.html", {"user": user})
+
+@app.get("/favicon.ico")
+async def favicon():
+    from fastapi.responses import Response
+    # Простой SVG-круг как иконка
+    svg = '''<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100">
+        <circle cx="50" cy="50" r="45" fill="#c5a83d"/>
+        <text x="50" y="65" font-size="40" text-anchor="middle" fill="#1a1f16">🏰</text>
+    </svg>'''
+    return Response(content=svg, media_type="image/svg+xml")
